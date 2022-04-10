@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+    <form method="POST" action="add_new_task">
+        <div>Tytuł</div>
+        <input name="title">
+        <br>
+        <div>Opis</div>
+        <input name="description">
+        <br>
+        <div>Priorytet</div>
+        <input name="priority">
+        <br>
+        <div>Kto robi</div>
+        <input name="assignee">
+        <br>
+        <div>Status</div>
+        <input name="status">
+        <br>
+        <input type="submit" value="Utwórz">
+
+</div>
+{% endblock %}

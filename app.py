@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -72,6 +72,20 @@ def signup():
 
     return render_template('signup.html', form=form)
 
+@app.route('/new_task')
+def hello_world():  # put application's code here
+    return render_template('create_new_task.html')
+
+
+@app.route("/add_new_task", methods=["GET", "POST"])
+def change_url():
+    new_task = {}
+    new_task['title'] = request.form["title"]
+    new_task['description'] = request.form["description"]
+    new_task['priority'] = request.form["priority"]
+    new_task['assignee'] = request.form["assignee"]
+    new_task['status'] = request.form["status"]
+    print(new_task)
 
 if __name__ == '__main__':
     app.run(debug=False)
