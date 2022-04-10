@@ -4,12 +4,15 @@ import psycopg2
 # Gets connection to the Postgre DB
 def getConnection():
     conn = None
+    with open('pass.txt', 'r') as f:
+        passw = f.readline()
+
     try:
         conn = psycopg2.connect(
             host = "tasklistwsb.postgres.database.azure.com",
             database = "postgres", 
             user = "taskadmin", 
-            password = "2A6shEiVvtB9psWcRCoE",
+            password = passw,
             port = 5432)
         #print("Postgre Version: ")
         #cur = conn.cursor()
@@ -99,6 +102,9 @@ def insertTask():
 
 def modifyTask():
     print("modify task")
+
+def getTasks():
+    print("get tasks")
 
 
 
