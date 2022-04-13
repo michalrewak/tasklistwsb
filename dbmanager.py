@@ -1,5 +1,5 @@
 import bcrypt
-import psycopg2
+import psycopg
 
 # Gets connection to the Postgre DB
 def getConnection():
@@ -8,7 +8,7 @@ def getConnection():
         passw = f.readline()
 
     try:
-        conn = psycopg2.connect(
+        conn = psycopg.connect(
             host = "tasklistwsb.postgres.database.azure.com",
             database = "postgres", 
             user = "taskadmin", 
@@ -19,7 +19,7 @@ def getConnection():
         #cur.execute("select version()")
         #db_version = cur.fetchone()
         #print(db_version)
-    except(Exception, psycopg2.DatabaseError) as error:
+    except(Exception, psycopg.DatabaseError) as error:
         print(error) #log error
     return conn
 
@@ -33,7 +33,7 @@ def userExists(username):
         cur.execute(sql, (username,))
         userExists = cur.rowcount != 0
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
+    except (Exception, psycopg.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
@@ -63,7 +63,7 @@ def createUser(username, password):
         updated_count = cur.rowcount
         conn.commit()
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
+    except (Exception, psycopg.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
@@ -90,20 +90,59 @@ def loginUser(username, password):
         print(passw)
         utf8Password = password.encode("utf-8")
         loginSuccess == bcrypt.checkpw(utf8Password, passw.encode("utf-8"))
-    except (Exception, psycopg2.DatabaseError) as error:
+    except (Exception, psycopg.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
 
 
-def insertTask():
-    print("insert task")
+# inserts entire task into database 
+def insertTask(title, priority, assigne_id, desc, status):
+    conn = getConnection()
+    sql = """
+    INSERT INTO tasks.task (title, priority, assigneid, description, status)
+    VALUES (%s, %s, %s, %s, %s)
+    """
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, (title, priority, assigne_id, desc, status))
+        updated_count = cur.rowcount
+        conn.commit()
+        cur.close()
+    except (Exception, psycopg.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    print(f"Updated count: {updated_count}")
 
-def modifyTask():
-    print("modify task")
+def modifyTask(taskid, title, priority, desc, status):
+    conn = getConnection()
+    sql = """
+        UPDATE tasks.task
+        SET
+            title = %s,
+            priority = %s,
+            description = %s,
+            status = %s
+        WHERE
+            id = %s
+    """
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, (title, priority, desc, status, taskid))
+        updated_count = cur.rowcount
+        conn.commit()
+        cur.close()
+    except (Exception, psycopg.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    print(f"Updated count: {updated_count}")
 
-def getTasks():
+def getTasks(user_id = None):
     print("get tasks")
 
 
