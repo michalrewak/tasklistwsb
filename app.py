@@ -101,19 +101,19 @@ def signup():
 
 @app.route("/add_new_task", methods=["GET", "POST"])
 def new_task():  # put application's code here
-    # new_task = {}
-    # new_task["title"] = request.form["title"]
-    # new_task["description"] = request.form["description"]
-    # new_task["priority"] = request.form["priority"]
-    # new_task["assignee"] = request.form["assignee"]
-    # new_task["status"] = request.form["status"]
-    # db.session.add(new_task)
-    # db.session.commit()
+    new_task = {}
+    new_task["title"] = request.form["title"]
+    new_task["description"] = request.form["description"]
+    new_task["priority"] = request.form["priority"]
+    new_task["assignee"] = request.form["assignee"]
+    new_task["status"] = request.form["status"]
+    db.session.add(new_task)
+    db.session.commit()
     return render_template("create_new_task.html")
 
 
 @app.route("/tasks", methods=["GET"])
-def create():  # put application's code here
+def display_tasks():
     items = [
         {"id": "1", "title": "task1", "priority" : "niski", "assignee" : "Michał" },
         {"id": "2", "title": "task2", "priority" : "średni", "assignee" : "Andrzej"},
