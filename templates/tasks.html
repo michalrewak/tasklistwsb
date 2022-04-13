@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+{% endblock %}
+
+{% block content %}
+ <div class="container table-responsive">
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="task-id">#</th>
+            <th class="task">Task Title</th>
+            <th class="status">Priority</th>
+            <th class="status">Assignee</th>
+            <th class="update">Edit</th>
+            <th class="update">Remove</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{item.id}}</td>
+                <td>{{item.title}}</td>
+                <td>{{item.priority}}</td>
+                <td>{{item.assignee}}</td>
+                <td><button type="button" class="btn btn-warning">Update</button></td>
+                    <td><button type="button" class="btn btn-danger">Delete</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('new_task')}}">
+     <button type="button" class="btn btn-success">Add</button>
+     </a>
+ </div>
+{% endblock %}

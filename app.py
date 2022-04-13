@@ -99,20 +99,28 @@ def signup():
     return render_template("signup.html", form=form)
 
 
-@app.route("/new_task")
-def new_task():  # put application's code here
-    return render_template("create_new_task.html")
-
-
 @app.route("/add_new_task", methods=["GET", "POST"])
-def change_url():
-    new_task = {}
-    new_task["title"] = request.form["title"]
-    new_task["description"] = request.form["description"]
-    new_task["priority"] = request.form["priority"]
-    new_task["assignee"] = request.form["assignee"]
-    new_task["status"] = request.form["status"]
+def new_task():  # put application's code here
+    # new_task = {}
+    # new_task["title"] = request.form["title"]
+    # new_task["description"] = request.form["description"]
+    # new_task["priority"] = request.form["priority"]
+    # new_task["assignee"] = request.form["assignee"]
+    # new_task["status"] = request.form["status"]
+    # db.session.add(new_task)
+    # db.session.commit()
     return render_template("create_new_task.html")
+
+
+@app.route("/tasks", methods=["GET"])
+def create():  # put application's code here
+    items = [
+        {"id": "1", "title": "task1", "priority" : "niski", "assignee" : "Michał" },
+        {"id": "2", "title": "task2", "priority" : "średni", "assignee" : "Andrzej"},
+        {"id": "3", "title": "task3", "priority" : "średni", "assignee" : "Enrico"},
+        {"id": "4", "title": "task4", "priority" : "średni", "assignee" : "Leonid"}
+    ]
+    return render_template("tasks.html", items=items)
 
 
 if __name__ == "__main__":
