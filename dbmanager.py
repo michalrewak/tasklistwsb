@@ -1,6 +1,7 @@
 import bcrypt
 import psycopg2
 
+
 # Gets connection to the Postgre DB
 def getConnection():
     conn = None
@@ -9,21 +10,22 @@ def getConnection():
 
     try:
         conn = psycopg2.connect(
-            host = "tasklistwsb.postgres.database.azure.com",
-            database = "postgres", 
-            user = "taskadmin", 
-            password = passw,
-            port = 5432)
-        #print("Postgre Version: ")
-        #cur = conn.cursor()
-        #cur.execute("select version()")
-        #db_version = cur.fetchone()
-        #print(db_version)
+            host="tasklistwsb.postgres.database.azure.com",
+            database="postgres",
+            user="taskadmin",
+            password=passw,
+            port=5432)
+        print("Postgre Version: ")
+        # cur = conn.cursor()
+        # cur.execute("select version()")
+        # db_version = cur.fetchone()
+        # print(db_version)
     except(Exception, psycopg2.DatabaseError) as error:
-        print(error) #log error
+        print(error)  # log error
     return conn
 
-# Check if user exists in DB 
+
+# Check if user exists in DB
 def userExists(username):
     sql = """select id from tasks.assignee where email = %s"""
     conn = getConnection()
@@ -40,9 +42,10 @@ def userExists(username):
             conn.close()
     return userExists
 
+
 # Checks if user exists and if not, creates new one and hashes its password using bcrypt
 def createUser(username, password):
-    if(userExists(username) == True):
+    if (userExists(username) == True):
         # info ze user istnieje
         return
 
@@ -56,7 +59,7 @@ def createUser(username, password):
         false
     )"""
     conn = getConnection()
-    updated_count=0
+    updated_count = 0
     try:
         cur = conn.cursor()
         cur.execute(sql, (username, hash.decode("utf-8")))
@@ -70,10 +73,11 @@ def createUser(username, password):
             conn.close()
     print(f"Updated count: {updated_count}")
 
+
 # Check if user exists, then checks if password is correct
 def loginUser(username, password):
-    if(userExists(username) == False):
-        return 
+    if (userExists(username) == False):
+        return
 
     conn = getConnection()
     sql = """
@@ -83,7 +87,7 @@ def loginUser(username, password):
     try:
         cur = conn.cursor()
         cur.execute(sql, (username,))
-        if(cur.rowcount == 0):
+        if (cur.rowcount == 0):
             loginSuccess == False
             return
         passw = cur.fetchone()[1]
@@ -100,16 +104,32 @@ def loginUser(username, password):
 def insertTask():
     print("insert task")
 
+
 def modifyTask():
     print("modify task")
 
-def getTasks():
-    print("get tasks")
 
+def getTasks(user_id = None):
+    if user_id is None:
+        items = [
+            {"id": "1", "title": "task1", "priority": "niski", "assignee": "Michał", "assignee_id" : "1"},
+            {"id": "2", "title": "task2", "priority": "średni", "assignee": "Andrzej", "assignee_id" : "2"},
+            {"id": "3", "title": "task3", "priority": "średni", "assignee": "Enrico", "assignee_id" : "3"},
+            {"id": "4", "title": "task4", "priority": "średni", "assignee": "Leonid", "assignee_id" : "4"}
+            ]
+        return items
 
+    items = [
+        {"id": "1", "title": "task1", "priority": "niski", "assignee": "Michał", "assignee_id": "1"},
+        {"id": "2", "title": "task2", "priority": "średni", "assignee": "Andrzej", "assignee_id": "2"},
+        {"id": "3", "title": "task3", "priority": "średni", "assignee": "Enrico", "assignee_id": "3"},
+        {"id": "4", "title": "task4", "priority": "średni", "assignee": "Leonid", "assignee_id": "4"}
+    ]
 
-# test 
+    return [task for task in items if task['assignee_id'] == user_id]
+
+# test
 # getConnection()
-
-createUser("test3@tesdsst.com", "testPassword123")
-loginUser("test3@tesdsst.com", "testPassword123")
+#
+# createUser("test3@tesdsst.com", "testPassword123")
+# loginUser("test3@tesdsst.com", "testPassword123")
