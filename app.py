@@ -40,7 +40,7 @@ def load_user(user_id):
 
 class LoginForm(FlaskForm):
     username = StringField(
-        "username", validators=[InputRequired(), Length(min=4, max=15)]
+        "email", validators=[InputRequired(), Email(message="Invalid email"), Length(max=50)]
     )
     password = PasswordField(
         "password", validators=[InputRequired(), Length(min=8, max=80)]
@@ -52,9 +52,6 @@ class RegisterForm(FlaskForm):
     email = StringField(
         "email",
         validators=[InputRequired(), Email(message="Invalid email"), Length(max=50)],
-    )
-    username = StringField(
-        "username", validators=[InputRequired(), Length(min=4, max=15)]
     )
     password = PasswordField(
         "password", validators=[InputRequired(), Length(min=8, max=80)]
@@ -88,13 +85,7 @@ def signup():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method="sha256")
-        new_user = User(
-            username=form.username.data, email=form.email.data, password=hashed_password
-        )
-        db.session.add(new_user)
-        db.session.commit()
-
+        test.createUser(form.email.data, form.password.data)
         return "<h1>New user has been created!</h1>"
         # return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
