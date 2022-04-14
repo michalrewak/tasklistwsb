@@ -69,7 +69,8 @@ def login():
         if userId != -1:
             session["_user_id"] = userId
             # how to flask-lofin
-            # login_user(user, remember=form.remember.data)
+            user = User(id, test.userEmail(id))
+            login_user(user, remember=form.remember.data)
             return redirect(url_for("index"))
 
         return "<h1>Invalid email or password</h1>"
