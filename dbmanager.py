@@ -1,5 +1,5 @@
 import bcrypt
-import psycopg
+import psycopg2
 
 
 # Gets connection to the Postgre DB
@@ -7,20 +7,14 @@ def getConnection():
     conn = None
     with open('pass.txt', 'r') as f:
         passw = f.readline()
-
     try:
-        conn = psycopg.connect(
+        conn = psycopg2.connect(
             host = "tasklistwsb.postgres.database.azure.com",
             database = "postgres", 
             user = "taskadmin", 
             password = passw,
             port = 5432)
-        #print("Postgre Version: ")
-        #cur = conn.cursor()
-        #cur.execute("select version()")
-        #db_version = cur.fetchone()
-        #print(db_version)
-    except(Exception, psycopg.DatabaseError) as error:
+    except(Exception, psycopg2.DatabaseError) as error:
         print(error) #log error
     return conn
 
@@ -35,12 +29,29 @@ def userExists(username):
         cur.execute(sql, (username,))
         userExists = cur.rowcount != 0
         cur.close()
-    except (Exception, psycopg.DatabaseError) as error:
+    except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
     return userExists
+
+# Checks if user is admin based on id 
+def userIsAdmin(user_id):
+    sql = """select isadmin from tasks.assignee where id = %s"""
+    conn = getConnection()
+    userIsAdmin = False
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, (user_id,))
+        userIsAdmin = cur.fetchone()[0]
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return userIsAdmin
 
 
 # Checks if user exists and if not, creates new one and hashes its password using bcrypt
@@ -66,7 +77,7 @@ def createUser(username, password):
         updated_count = cur.rowcount
         conn.commit()
         cur.close()
-    except (Exception, psycopg.DatabaseError) as error:
+    except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
@@ -94,7 +105,7 @@ def loginUser(username, password):
         print(passw)
         utf8Password = password.encode("utf-8")
         loginSuccess == bcrypt.checkpw(utf8Password, passw.encode("utf-8"))
-    except (Exception, psycopg.DatabaseError) as error:
+    except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
@@ -114,13 +125,14 @@ def insertTask(title, priority, assigne_id, desc, status):
         updated_count = cur.rowcount
         conn.commit()
         cur.close()
-    except (Exception, psycopg.DatabaseError) as error:
+    except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
     print(f"Updated count: {updated_count}")
 
+# modifies task and does not care what have been modified by user, updates everything
 def modifyTask(taskid, title, priority, desc, status):
     conn = getConnection()
     sql = """
@@ -139,37 +151,54 @@ def modifyTask(taskid, title, priority, desc, status):
         updated_count = cur.rowcount
         conn.commit()
         cur.close()
-    except (Exception, psycopg.DatabaseError) as error:
+    except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
     print(f"Updated count: {updated_count}")
 
-def getTasks(user_id = None):
-    print("get tasks")
+# Gets user tasks if specified or all tasks 
+def getTasks(user_id):
+    conn = getConnection()
+    sql = "select t.id, title, priority, email, a.id from tasks.task t inner join tasks.assignee a on a.id=t.assigneid"
+    items = [ ]
+    is_admin = userIsAdmin(user_id)
+    if(is_admin == False):
+        sql += " where assigneid = %s"
+    try:
+        cur = conn.cursor()
+        if(is_admin == False):
+            cur.execute(sql, (user_id,))
+        else:
+            cur.execute(sql)
+        
+        row_count = cur.rowcount
+        row = cur.fetchone()
+        while row:
+            items.append({ "id": row[0], "title": row[1], "priority":row[2], "assignee":row[3], "assignee_id":row[4]})
+            row = cur.fetchone()
+    except(Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally: 
+        if conn is not None:
+            conn.close()
+    print(f"Returned count: {row_count}")
+    return items
 
-def getTasks(user_id = None):
-    if user_id is None:
-        items = [
-            {"id": "1", "title": "task1", "priority": "niski", "assignee": "Michał", "assignee_id" : "1"},
-            {"id": "2", "title": "task2", "priority": "średni", "assignee": "Andrzej", "assignee_id" : "2"},
-            {"id": "3", "title": "task3", "priority": "średni", "assignee": "Enrico", "assignee_id" : "3"},
-            {"id": "4", "title": "task4", "priority": "średni", "assignee": "Leonid", "assignee_id" : "4"}
-            ]
-        return items
 
-    items = [
-        {"id": "1", "title": "task1", "priority": "niski", "assignee": "Michał", "assignee_id": "1"},
-        {"id": "2", "title": "task2", "priority": "średni", "assignee": "Andrzej", "assignee_id": "2"},
-        {"id": "3", "title": "task3", "priority": "średni", "assignee": "Enrico", "assignee_id": "3"},
-        {"id": "4", "title": "task4", "priority": "średni", "assignee": "Leonid", "assignee_id": "4"}
-    ]
 
-    return [task for task in items if task['assignee_id'] == user_id]
 
 # test
 # getConnection()
-#
 # createUser("test3@tesdsst.com", "testPassword123")
 # loginUser("test3@tesdsst.com", "testPassword123")
+# getTasks(3) 
+# insertTask(
+#     "Testowy tytul zadania", 
+#     1, 
+#     2, 
+#     """Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. 
+#     Vivamus gravida tellus iaculis leo semper, eget volutpat mi dictum. """,
+#     "W trakcie")
+# modifyTask(4, "Testowy tytul zadania", 2, "Vivamus gravida tellus iaculis leo semper, eget volutpat mi dictum. Cras fermentum purus vitae diam sodales viverra.", "W trakcie")
