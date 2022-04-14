@@ -20,26 +20,23 @@ app.config["SECRET_KEY"] = "blabla"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./test.db"
 bootstrap = Bootstrap(app)
 test = dbmanager
-db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(15), unique=True)
-    email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(80))
-
+class User(UserMixin):
+    def __init__(self, id, email):
+        self.id = id
+        self.email = email
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User(user_id, test.userEmail(user_id))
 
 
 class LoginForm(FlaskForm):
-    username = StringField(
+    email = StringField(
         "email", validators=[InputRequired(), Email(message="Invalid email"), Length(max=50)]
     )
     password = PasswordField(
@@ -68,13 +65,14 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user:
-            if check_password_hash(user.password, form.password.data):
-                login_user(user, remember=form.remember.data)
-                return redirect(url_for("index"))
+        userId = test.loginUser(form.email.data, form.password.data)
+        if userId != -1:
+            session["_user_id"] = userId
+            # how to flask-lofin
+            # login_user(user, remember=form.remember.data)
+            return redirect(url_for("index"))
 
-        return "<h1>Invalid username or password</h1>"
+        return "<h1>Invalid email or password</h1>"
         # return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
 
     return render_template("login.html", form=form)
@@ -117,4 +115,4 @@ def tasks_list():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

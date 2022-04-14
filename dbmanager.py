@@ -53,6 +53,24 @@ def userIsAdmin(user_id):
             conn.close()
     return userIsAdmin
 
+# Gets user email 
+def userEmail(user_id):
+    sql = """select email from tasks.assignee where id = %s"""
+    conn = getConnection()
+    userEmail = False
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, (user_id,))
+        userEmail = cur.fetchone()[0]
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return userEmail
+
+
 
 # Checks if user exists and if not, creates new one and hashes its password using bcrypt
 def createUser(username, password):
@@ -101,10 +119,15 @@ def loginUser(username, password):
         if (cur.rowcount == 0):
             loginSuccess == False
             return
-        passw = cur.fetchone()[1]
+        row = cur.fetchone()
+        passw = row[1]
+        id = row[0]
         print(passw)
         utf8Password = password.encode("utf-8")
-        loginSuccess == bcrypt.checkpw(utf8Password, passw.encode("utf-8"))
+        if(bcrypt.checkpw(utf8Password, passw.encode("utf-8"))):
+            return id
+        else:
+            return -1
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
