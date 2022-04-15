@@ -1,4 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, session
+import flask_login
+from flask_session import Session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
@@ -18,6 +20,9 @@ import dbmanager
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "blabla"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./test.db"
+SESSION_TYPE = 'filesystem'
+app.config.from_object(__name__)
+Session(app)
 bootstrap = Bootstrap(app)
 test = dbmanager
 login_manager = LoginManager()
@@ -25,10 +30,11 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
+
 class User(UserMixin):
     def __init__(self, id, email):
-        self.id = id
-        self.email = email
+        self.id = int(id)
+        self.email = str(email)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -67,8 +73,8 @@ def login():
     if form.validate_on_submit():
         userId = test.loginUser(form.email.data, form.password.data)
         if userId != -1:
-            session["_user_id"] = userId
-            user = User(id, test.userEmail(id))
+            session['_user_id'] = userId
+            user = User(userId, test.userEmail(id))
             login_user(user, remember=form.remember.data)
             return redirect(url_for("index"))
 
@@ -108,8 +114,8 @@ def tasks_list():
     if '_user_id' not in session:
         return redirect("signup")
 
-    user_id = session['_user_id']
-    tasks = test.getTasks(user_id)
+    userid = flask_login.current_user._get_current_object().id
+    tasks = test.getTasks(userid)
 
     return render_template("tasks.html", items=tasks)
 

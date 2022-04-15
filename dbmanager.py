@@ -187,6 +187,7 @@ def getTasks(user_id):
     sql = "select t.id, title, priority, email, a.id from tasks.task t inner join tasks.assignee a on a.id=t.assigneid"
     items = [ ]
     is_admin = userIsAdmin(user_id)
+    row_count = 0
     if(is_admin == False):
         sql += " where assigneid = %s"
     try:
