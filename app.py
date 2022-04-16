@@ -86,7 +86,7 @@ def signup():
 
     if form.validate_on_submit():
         test.createUser(form.email.data, form.password.data)
-        return "<h1>New user has been created!</h1>"
+        return redirect('login')
 
     return render_template("signup.html", form=form)
 
