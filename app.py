@@ -137,6 +137,7 @@ def delete_task(task_id, assignee):
         return str(user_email)
     test.delete_task(task_id)
     tasks = test.getTasks(user_id)
+
     return render_template("tasks.html", items=tasks)
 
 

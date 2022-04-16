@@ -187,13 +187,12 @@ def modifyTask(taskid, title, priority, desc, status):
 def delete_task(task_id):
     conn = getConnection()
     sql = """
-        DELETE FROM tasks
-        WHERE
-            id = %s
+        DELETE FROM tasks.task
+	    WHERE id = %s
     """
     try:
         cur = conn.cursor()
-        cur.execute(sql, task_id)
+        cur.execute(sql, (task_id,))
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
