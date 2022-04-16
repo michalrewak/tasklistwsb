@@ -4,26 +4,31 @@
 
 <div>
     <form method="POST" action="add_new_task">
-        <div>Tytuł</div>
-        <input name="title">
-        <br>
-        <div>Opis</div>
-        <input name="description">
-        <br>
-        <div>Priorytet</div>
-        <select name="priority">
-            <option value="high">Wysoki</option>
-            <option value="medium">Średni</option>
-            <option value="low">Niski</option>
-        </select>
-        <br>
-        <div>Kto robi</div>
-        <input name="assignee">
-        <br>
-        <div>Status</div>
-        <input name="status">
-        <br>
-        <input type="submit" value="Utwórz">
-
+        <div class="form-group">
+            <label>Tytuł</label>
+            <input name="title" class="form-control" placeholder="Tytuł">
+        </div>
+        <div class="form-group">
+            <label>Opis</label>
+            <input name="description" class="form-control" placeholder="Opis">
+        </div>
+        <div class="form-group">
+            <label>Priorytet</label>
+            <select name="priority" class="form-control">
+                <option value="high">Wysoki</option>
+                <option value="medium">Średni</option>
+                <option value="low">Niski</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Kto robi</label>
+            <input name="assignee"  class="form-control" placeholder="Kto robi">
+        </div>
+        <div class="form-group">
+            <label>Status</label>
+            <input name="status" class="form-control" placeholder="Status">
+        </div>
+        <button type="submit" class="btn btn-primary">Utwórz</button>
+    </form>
 </div>
 {% endblock %}
