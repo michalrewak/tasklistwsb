@@ -5,18 +5,17 @@ import psycopg2
 # Gets connection to the Postgre DB
 def getConnection():
     conn = None
-    with open("pass.txt", "r") as f:
+    with open('pass.txt', 'r') as f:
         passw = f.readline()
     try:
         conn = psycopg2.connect(
-            host="tasklistwsb.postgres.database.azure.com",
-            database="postgres",
-            user="taskadmin",
-            password=passw,
-            port=5432,
-        )
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)  # log error
+            host = "tasklistwsb.postgres.database.azure.com",
+            database = "postgres", 
+            user = "taskadmin", 
+            password = passw,
+            port = 5432)
+    except(Exception, psycopg2.DatabaseError) as error:
+        print(error) #log error
     return conn
 
 
@@ -37,8 +36,7 @@ def userExists(username):
             conn.close()
     return userExists
 
-
-# Checks if user is admin based on id
+# Checks if user is admin based on id 
 def userIsAdmin(user_id):
     sql = """select isadmin from tasks.assignee where id = %s"""
     conn = getConnection()
@@ -55,8 +53,7 @@ def userIsAdmin(user_id):
             conn.close()
     return userIsAdmin
 
-
-# Gets user email
+# Gets user email 
 def userEmail(user_id):
     sql = """select email from tasks.assignee where id = %s"""
     conn = getConnection()
@@ -74,13 +71,14 @@ def userEmail(user_id):
     return userEmail
 
 
+
 # Checks if user exists and if not, creates new one and hashes its password using bcrypt
 def createUser(username, password):
-    if userExists(username) == True:
+    if (userExists(username) == True):
         # info ze user istnieje
         return
 
-    hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     sql = """
         INSERT INTO tasks.assignee (email, password, isadmin)
     VALUES 
@@ -107,7 +105,7 @@ def createUser(username, password):
 
 # Check if user exists, then checks if password is correct
 def loginUser(username, password):
-    if userExists(username) == False:
+    if (userExists(username) == False):
         return
 
     conn = getConnection()
@@ -118,7 +116,7 @@ def loginUser(username, password):
     try:
         cur = conn.cursor()
         cur.execute(sql, (username,))
-        if cur.rowcount == 0:
+        if (cur.rowcount == 0):
             loginSuccess == False
             return
         row = cur.fetchone()
@@ -126,7 +124,7 @@ def loginUser(username, password):
         id = row[0]
         print(passw)
         utf8Password = password.encode("utf-8")
-        if bcrypt.checkpw(utf8Password, passw.encode("utf-8")):
+        if(bcrypt.checkpw(utf8Password, passw.encode("utf-8"))):
             return id
         else:
             return -1
@@ -137,7 +135,7 @@ def loginUser(username, password):
             conn.close()
 
 
-# inserts entire task into database
+# inserts entire task into database 
 def insertTask(title, priority, assigne_id, desc, status):
     conn = getConnection()
     sql = """
@@ -156,7 +154,6 @@ def insertTask(title, priority, assigne_id, desc, status):
         if conn is not None:
             conn.close()
     print(f"Updated count: {updated_count}")
-
 
 # modifies task and does not care what have been modified by user, updates everything
 def modifyTask(taskid, title, priority, desc, status):
@@ -184,47 +181,47 @@ def modifyTask(taskid, title, priority, desc, status):
             conn.close()
     print(f"Updated count: {updated_count}")
 
-
-# Gets user tasks if specified or all tasks
+# Gets user tasks if specified or all tasks 
 def getTasks(user_id):
     conn = getConnection()
     sql = "select t.id, title, priority, email, a.id from tasks.task t inner join tasks.assignee a on a.id=t.assigneid"
-    items = []
+    items = [ ]
     is_admin = userIsAdmin(user_id)
-    row_count = 0
-    if is_admin == False:
+    if(is_admin == False):
         sql += " where assigneid = %s"
     try:
         cur = conn.cursor()
-        if is_admin == False:
+        if(is_admin == False):
             cur.execute(sql, (user_id,))
         else:
             cur.execute(sql)
-
+        
         row_count = cur.rowcount
         row = cur.fetchone()
         while row:
-            items.append({"id": row[0], "title": row[1], "priority": row[2], "assignee": row[3], "assignee_id": row[4]})
+            items.append({ "id": row[0], "title": row[1], "priority":row[2], "assignee":row[3], "assignee_id":row[4]})
             row = cur.fetchone()
-    except (Exception, psycopg2.DatabaseError) as error:
+    except(Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
+    finally: 
         if conn is not None:
             conn.close()
     print(f"Returned count: {row_count}")
     return items
 
 
+
+
 # test
 # getConnection()
 # createUser("test3@tesdsst.com", "testPassword123")
 # loginUser("test3@tesdsst.com", "testPassword123")
-# getTasks(3)
+# getTasks(3) 
 # insertTask(
-#     "Testowy tytul zadania",
-#     1,
-#     2,
-#     """Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+#     "Testowy tytul zadania", 
+#     1, 
+#     2, 
+#     """Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. 
 #     Vivamus gravida tellus iaculis leo semper, eget volutpat mi dictum. """,
 #     "W trakcie")
 # modifyTask(4, "Testowy tytul zadania", 2, "Vivamus gravida tellus iaculis leo semper, eget volutpat mi dictum. Cras fermentum purus vitae diam sodales viverra.", "W trakcie")
