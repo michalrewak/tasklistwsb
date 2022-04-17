@@ -34,8 +34,9 @@ class Priority(Enum):
 
 
 class User(UserMixin):
-    def __init__(self, id, email):
-        self.id = int(id)
+    def __init__(self, userid, email):
+        self.id = int(userid)
+        self.userid = int(userid)
         self.email = str(email)
 
 
@@ -104,7 +105,7 @@ def new_task():
 
 @app.route("/new_task_commit", methods=["GET", "POST"])
 def new_task_commit():
-    userid = flask_login.current_user._get_current_object().id
+    userid = flask_login.current_user._get_current_object().userid
     test.insertTask(
         request.form["title"],
         Priority[request.form["priority"]].value,
@@ -120,7 +121,7 @@ def tasks_list():
     if "_user_id" not in session:
         return redirect("signup")
 
-    userid = flask_login.current_user._get_current_object().id
+    userid = flask_login.current_user._get_current_object().userid
     tasks = test.getTasks(userid)
 
     return render_template("tasks.html", items=tasks)
@@ -130,15 +131,13 @@ def tasks_list():
 def delete_task(task_id, assignee):
     if "_user_id" not in session:
         return redirect("signup")
-    user_id = flask_login.current_user._get_current_object().id
+    user_id = flask_login.current_user._get_current_object().userid
     user_email = test.userEmail(user_id)
 
     if assignee != user_email:
         return str(user_email)
     test.delete_task(task_id)
-    tasks = test.getTasks(user_id)
-
-    return render_template("tasks.html", items=tasks)
+    return redirect("../tasks")
 
 
 if __name__ == "__main__":

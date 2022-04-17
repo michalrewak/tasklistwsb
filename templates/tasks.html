@@ -16,6 +16,7 @@ Login
             <th class="task">Task Title</th>
             <th class="status">Priority</th>
             <th class="status">Assignee</th>
+             <th class="status">Description</th>
             <th class="update">Edit</th>
             <th class="update">Remove</th>
          </tr>
@@ -27,6 +28,7 @@ Login
             <td>{{item.title}}</td>
             <td>{{item.priority}}</td>
             <td>{{item.assignee}}</td>
+             <td>{{ item.description }}</td>
             <td><button type="button" class="btn btn-warning">Update</button></td>
             <td>
                <form action="{{ url_for('delete_task', task_id = item.id, assignee = item.assignee) }}" method=post>
@@ -37,8 +39,10 @@ Login
          {% endfor %}
       </tbody>
    </table>
-   <a href="{{ url_for('new_task')}}">
-   <button type="button" class="btn btn-success">Add</button>
-   </a>
+   <div class="container">
+       <a href="{{ url_for('new_task')}}">
+            <button type="button" class="btn btn-success">Add new task</button>
+       </a>
+   </div>
 </div>
 {% endblock %}
