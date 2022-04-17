@@ -23,63 +23,63 @@ def getConnection():
 def userExists(username):
     sql = """select id from tasks.assignee where email = %s"""
     conn = getConnection()
-    userExists = False
+    user_exists = False
     try:
         cur = conn.cursor()
         cur.execute(sql, (username,))
-        userExists = cur.rowcount != 0
+        user_exists = cur.rowcount != 0
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-    return userExists
+    return user_exists
 
 
 # Checks if user is admin based on id
 def userIsAdmin(user_id):
     sql = """select isadmin from tasks.assignee where id = %s"""
     conn = getConnection()
-    userIsAdmin = False
+    user_is_admin = False
     try:
         cur = conn.cursor()
         cur.execute(sql, (user_id,))
-        userIsAdmin = cur.fetchone()[0]
+        user_is_admin = cur.fetchone()[0]
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-    return userIsAdmin
+    return user_is_admin
 
 
 # Gets user email
 def userEmail(user_id):
     sql = """select email from tasks.assignee where id = %s"""
     conn = getConnection()
-    userEmail = False
+    user_email = ""
     try:
         cur = conn.cursor()
         cur.execute(sql, (user_id,))
-        userEmail = cur.fetchone()[0]
+        user_email = cur.fetchone()[0]
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-    return userEmail
+    return user_email
 
 
 # Checks if user exists and if not, creates new one and hashes its password using bcrypt
 def createUser(username, password):
-    if (userExists(username) == True):
+    if userExists(username):
         # info ze user istnieje
         return
 
-    hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    bcrypt_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     sql = """
         INSERT INTO tasks.assignee (email, password, isadmin)
     VALUES 
@@ -92,7 +92,7 @@ def createUser(username, password):
     updated_count = 0
     try:
         cur = conn.cursor()
-        cur.execute(sql, (username, hash.decode("utf-8")))
+        cur.execute(sql, (username, bcrypt_hash.decode("utf-8")))
         updated_count = cur.rowcount
         conn.commit()
         cur.close()
@@ -106,26 +106,24 @@ def createUser(username, password):
 
 # Check if user exists, then checks if password is correct
 def loginUser(username, password):
-    if (userExists(username) == False):
+    if not userExists(username):
         return
 
     conn = getConnection()
     sql = """
     select id, password from tasks.assignee where email = %s
     """
-    loginSuccess = False
     try:
         cur = conn.cursor()
         cur.execute(sql, (username,))
-        if (cur.rowcount == 0):
-            loginSuccess == False
-            return
+        if cur.rowcount == 0:
+            return -1
         row = cur.fetchone()
         passw = row[1]
         id = row[0]
         print(passw)
-        utf8Password = password.encode("utf-8")
-        if (bcrypt.checkpw(utf8Password, passw.encode("utf-8"))):
+        utf8_password = password.encode("utf-8")
+        if bcrypt.checkpw(utf8_password, passw.encode("utf-8")):
             return id
         else:
             return -1
@@ -143,6 +141,7 @@ def insertTask(title, priority, assigne_id, desc, status):
     INSERT INTO tasks.task (title, priority, assigneid, description, status)
     VALUES (%s, %s, %s, %s, %s)
     """
+    updated_count = 0
     try:
         cur = conn.cursor()
         cur.execute(sql, (title, priority, assigne_id, desc, status))
@@ -170,6 +169,7 @@ def modifyTask(taskid, title, priority, desc, status):
         WHERE
             id = %s
     """
+    updated_count = 0
     try:
         cur = conn.cursor()
         cur.execute(sql, (title, priority, desc, status, taskid))
@@ -205,14 +205,15 @@ def delete_task(task_id):
 # Gets user tasks if specified or all tasks
 def getTasks(user_id):
     conn = getConnection()
-    sql = "select t.id, title, priority, email, a.id from tasks.task t inner join tasks.assignee a on a.id=t.assigneid"
+    sql = "select t.id, title, priority, email, a.id, description from tasks.task t inner join tasks.assignee a on a.id=t.assigneid"
     items = []
+    row_count = 0
     is_admin = userIsAdmin(user_id)
-    if (is_admin == False):
+    if not is_admin:
         sql += " where assigneid = %s"
     try:
         cur = conn.cursor()
-        if (is_admin == False):
+        if not is_admin:
             cur.execute(sql, (user_id,))
         else:
             cur.execute(sql)
@@ -220,7 +221,7 @@ def getTasks(user_id):
         row_count = cur.rowcount
         row = cur.fetchone()
         while row:
-            items.append({"id": row[0], "title": row[1], "priority": row[2], "assignee": row[3], "assignee_id": row[4]})
+            items.append({"id": row[0], "title": row[1], "priority": row[2], "assignee": row[3], "assignee_id": row[4], "description": row[5]})
             row = cur.fetchone()
     except(Exception, psycopg2.DatabaseError) as error:
         print(error)
