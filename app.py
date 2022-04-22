@@ -21,7 +21,6 @@ SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)
 Session(app)
 bootstrap = Bootstrap(app)
-test = dbmanager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -42,7 +41,7 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User(user_id, test.userEmail(user_id))
+    return User(user_id, dbmanager.userEmail(user_id))
 
 
 class LoginForm(FlaskForm):
@@ -75,10 +74,10 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        userId = test.loginUser(form.email.data, form.password.data)
+        userId = dbmanager.loginUser(form.email.data, form.password.data)
         if userId != -1:
             session["_user_id"] = userId
-            user = User(userId, test.userEmail(id))
+            user = User(userId, dbmanager.userEmail(id))
             login_user(user, remember=form.remember.data)
             return redirect("tasks")
 
@@ -92,7 +91,7 @@ def signup():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        test.createUser(form.email.data, form.password.data)
+        dbmanager.createUser(form.email.data, form.password.data)
         return "<h1>New user has been created!</h1>"
 
     return render_template("signup.html", form=form)
@@ -106,7 +105,7 @@ def new_task():
 @app.route("/new_task_commit", methods=["GET", "POST"])
 def new_task_commit():
     userid = flask_login.current_user._get_current_object().userid
-    test.insertTask(
+    dbmanager.insertTask(
         request.form["title"],
         Priority[request.form["priority"]].value,
         userid,
@@ -122,7 +121,7 @@ def tasks_list():
         return redirect("signup")
 
     userid = flask_login.current_user._get_current_object().userid
-    tasks = test.getTasks(userid)
+    tasks = dbmanager.getTasks(userid)
 
     return render_template("tasks.html", items=tasks)
 
@@ -132,11 +131,11 @@ def delete_task(task_id, assignee):
     if "_user_id" not in session:
         return redirect("signup")
     user_id = flask_login.current_user._get_current_object().userid
-    user_email = test.userEmail(user_id)
+    user_email = dbmanager.userEmail(user_id)
 
     if assignee != user_email:
         return str(user_email)
-    test.delete_task(task_id)
+    dbmanager.delete_task(task_id)
     return redirect("../tasks")
 
 
