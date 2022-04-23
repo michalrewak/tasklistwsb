@@ -135,11 +135,11 @@ Create Azure Kubernetes Service with acr attached to use our docker image
    ```
 Setup kubectl service
    ```bash
-    kubectl apply -f takslistwsb.yaml
+    kubectl apply -f takslistwsb.yml
    ```
 Get public ip and paste in browser
    ```bash
-    kubectl get service web-yolo-service --watch
+    kubectl get service takslistwsb-svc --watch
    ```
 
 
