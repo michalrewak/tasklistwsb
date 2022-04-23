@@ -10,6 +10,25 @@ az postgres flexible-server create --location northeurope --resource-group mmgro
   --tags "app=micromanager" --version 13 --high-availability Disabled --zone 1 \
   --standby-zone 3
   ```
+  
+ Tworzenie klastera AKS \ ACR:
+ ```
+ az acr create -n MyRegistry -g MyResourceGroup --sku Standard
+ 
+ az aks create --name myAKSCluster --resource-group mmgroup
+
+ ```
+ Docker build image \ k8s:
+ 
+ ```
+ docker build -f Dockerfile -t tasklist:latest
+
+ kubectl apply -f “tasklistwsb\deployment.yml”
+ 
+ kubectl get services --watch
+
+ ```
+ 
 
 **1. Założenia projektowe:**
 
