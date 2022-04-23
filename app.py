@@ -139,5 +139,9 @@ def delete_task(task_id, assignee):
     return redirect("../tasks")
 
 
+def main():
+    app.run(host="0.0.0.0", port=80)
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    main()

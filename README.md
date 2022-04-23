@@ -88,7 +88,7 @@ Using pretrained YOLO model by ultralytics https://ultralytics.com.
    ```bash
     AKS=takslistwsb-aks
     ACR=takslistwsbegistry001
-    GROUP=wsbgroup
+    GROUP=wsbgroup1
     LOCATION=westus
    ```
 ### Docker Image
