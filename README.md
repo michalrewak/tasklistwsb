@@ -2,6 +2,15 @@
 
 ## Task Lista
 
+Tworzenie bazy postgre na azure:
+```
+az postgres flexible-server create --location northeurope --resource-group mmgroup \
+  --name mmpostgreserver --admin-user taskadmin --admin-password password \
+  --sku-name Standard_B1ms --tier Burstable --public-access all --storage-size 32 \
+  --tags "app=micromanager" --version 13 --high-availability Disabled --zone 1 \
+  --standby-zone 3
+  ```
+
 **1. Założenia projektowe:**
 
 - Do korzystania z aplikacji wymagane jest konto użytkownika.
