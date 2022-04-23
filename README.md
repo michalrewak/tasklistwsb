@@ -71,3 +71,79 @@
   
 
 Grupa: Michał Rewak, Andrzej Świtała, Leonid Stasyuk, Enrico Illiano
+
+
+# Yolo Web APP
+This is web application where you upload an image and get image with predicted bounding boxes. 
+Using pretrained YOLO model by ultralytics https://ultralytics.com.
+
+## Prerequisites
+1. Ubuntu 18.04 OS
+2. Installed:
+   - azure-cli
+   - kubectl
+   - docker
+## Application Deployment
+### Setup Variables
+   ```bash
+    AKS=takslistwsb-aks
+    ACR=takslistwsbegistry001
+    GROUP=wsbgroup
+    LOCATION=westus
+   ```
+### Docker Image
+Build docker image
+   ```bash
+   docker build -t takslistwsb .
+   ```
+Test docker image
+   ```bash
+    docker run -it --rm  takslistwsb:latest
+   ```
+### Initial Azure Setup
+Login to azure
+   ```bash
+    az login
+   ```
+Create resource group
+   ```bash
+    az group create -l $LOCATION -n $GROUP
+   ```
+Debug: Check resource group
+   ```bash
+    az group list
+   ```
+Debug: Check if properly logon
+   ```bash
+    az account list    
+   ```
+### Create a container registry
+   ```bash
+    az acr create -n $ACR -g $GROUP --sku basic
+    az acr login --name $ACR
+   ```
+### Push docker image to container registry
+   ```bash
+    docker tag takslistwsb:latest takslistwsbegistry001.azurecr.io/takslistwsb:v1
+    docker push takslistwsbegistry001.azurecr.io/takslistwsb:v1
+   ```
+## Azure Kubernetes Deploy
+Create Azure Kubernetes Service with acr attached to use our docker image
+   ```bash
+    az aks create -n $AKS -g $GROUP --generate-ssh-keys --attach-acr $ACR
+    az aks get-credentials -g $GROUP -n $AKS
+   ```
+Setup kubectl service
+   ```bash
+    kubectl apply -f takslistwsb.yaml
+   ```
+Get public ip and paste in browser
+   ```bash
+    kubectl get service web-yolo-service --watch
+   ```
+
+
+
+
+
+

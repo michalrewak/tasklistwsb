@@ -1,10 +1,8 @@
-FROM python:latest
-EXPOSE 80
-WORKDIR /usr/app
-
-COPY ./ ./
-
-RUN python -m venv env
+FROM python:3.8.0
+COPY . .
+RUN apt update
+RUN apt install ffmpeg libsm6 libxext6  -y
+RUN python -m pip install -U pip
 RUN pip install -r requirements.txt
-
-CMD ["python","app.py"]
+RUN pip install -e .
+CMD ["takslistwsb-app"]
