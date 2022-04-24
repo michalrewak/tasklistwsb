@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasklistwsb-svc
+spec:
+  selector:
+    app: tasklistwsb
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasklistwsb
+spec:
+  selector:
+    matchLabels:
+      app: tasklistwsb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tasklistwsb
+    spec:
+      containers:
+      - name: tasklistwsb
+        image: takslistwsbegistry001.azurecr.io/takslistwsb:v1
+        ports:
+        - containerPort: 80
