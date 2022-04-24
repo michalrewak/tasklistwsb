@@ -101,9 +101,6 @@ az postgres flexible-server create --location northeurope --resource-group mmgro
 Grupa: Michał Rewak, Andrzej Świtała, Leonid Stasyuk, Enrico Illiano
 
 
-# Yolo Web APP
-This is web application where you upload an image and get image with predicted bounding boxes. 
-Using pretrained YOLO model by ultralytics https://ultralytics.com.
 
 ## Prerequisites
 1. Ubuntu 18.04 OS
@@ -169,6 +166,7 @@ Get public ip and paste in browser
    ```bash
     kubectl get service takslistwsb-svc --watch
    ```
+
 
 
 
